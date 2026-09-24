@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kirinuki"
+version = "0.1.0"
+description = "YouTube動画の盛り上がった箇所を自動検知して切り抜き動画を作るツール"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "yt-dlp",
+    "numpy",
+]
+
+[project.optional-dependencies]
+# ffmpeg をシステムに入れられない場合の同梱バイナリ
+ffmpeg = ["imageio-ffmpeg"]
+dev = ["pytest", "imageio-ffmpeg"]
+
+[project.scripts]
+kirinuki = "kirinuki.cli:main"
+
+[tool.setuptools]
+packages = ["kirinuki"]
