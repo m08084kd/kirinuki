@@ -16,6 +16,6 @@ if [ ! -x .venv/bin/kirinuki-app ]; then
 fi
 
 # yt-dlp は YouTube の仕様変更に合わせて頻繁に更新されるので、起動時に最新化する
-.venv/bin/pip install --upgrade --quiet yt-dlp >/dev/null 2>&1
+.venv/bin/pip install --upgrade --quiet "yt-dlp[default]" >/dev/null 2>&1
 
 .venv/bin/kirinuki-app "$@"

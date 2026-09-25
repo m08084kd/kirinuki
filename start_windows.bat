@@ -19,7 +19,7 @@ if not exist ".venv\Scripts\kirinuki-app.exe" (
 )
 
 rem yt-dlp は YouTube の仕様変更に合わせて頻繁に更新されるので、起動時に最新化する
-".venv\Scripts\python.exe" -m pip install --upgrade --quiet yt-dlp >nul 2>nul
+".venv\Scripts\python.exe" -m pip install --upgrade --quiet "yt-dlp[default]" >nul 2>nul
 
 ".venv\Scripts\kirinuki-app.exe" %*
 exit /b 0

@@ -34,6 +34,21 @@ pip で入れた場合は `kirinuki-app` で起動できます。
 > アプリは自分のパソコンの中だけで動きます (`127.0.0.1`)。外部からはアクセスできません。
 > アプリを閉じるには、起動したウィンドウで Ctrl+C を押すか、ウィンドウを閉じてください。
 
+## iPad・スマホで使う (Google Colab)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/m08084kd/kirinuki/blob/claude/youtube-highlight-detection-clips-cemep2/kirinuki_colab.ipynb)
+
+パソコンがなくても、ブラウザだけで使えます (Google アカウントが必要)。
+
+1. 上の **「Open in Colab」** を開く
+2. **① 準備** の ▶ を押す (初回に出る警告は「このまま実行」)
+3. **② 切り抜く** に URL を貼って ▶ を押す → グラフと切り抜き動画がその場で再生できます
+4. **③ 保存する** で「Googleドライブ」か「ZIPでダウンロード」を選んで ▶
+
+Google ドライブに保存した動画は、iPad の「Google ドライブ」アプリで開いて ⋯ →「コピーを送信」→「ビデオを保存」で写真アプリに入れられます。
+
+> YouTube が Colab からのアクセスを一時的に止めることがあります。「Sign in to confirm you're not a bot」と出たら、メニュー「ランタイム」→「ランタイムを接続解除して削除」してから ① からやり直してください。
+
 ## コマンドラインで使う
 
 ```bash

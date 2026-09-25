@@ -9,7 +9,10 @@ description = "YouTube動画の盛り上がった箇所を自動検知して切�
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "yt-dlp",
+    # [default] に YouTube の認証チャレンジを解く yt-dlp-ejs が含まれる
+    "yt-dlp[default]",
+    # yt-dlp-ejs が使う JavaScript 実行環境
+    "deno",
     "numpy",
 ]
 

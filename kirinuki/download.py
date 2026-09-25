@@ -8,7 +8,11 @@ from .ffmpeg import ffmpeg_path
 
 
 def _base_opts(quiet: bool = True) -> dict:
-    opts = {"quiet": quiet, "no_warnings": quiet, "noprogress": quiet}
+    opts = {
+        "quiet": quiet, "no_warnings": quiet, "noprogress": quiet,
+        # YouTube の取得には JavaScript 実行環境が要る。入っているものを使う
+        "js_runtimes": {"deno": {}, "node": {}},
+    }
     try:
         opts["ffmpeg_location"] = ffmpeg_path()
     except Exception:
