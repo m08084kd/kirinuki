@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kirinuki</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>">
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --surface-2: #f0eee9;
+    --text: #1d1c1a;
+    --muted: #6b675f;
+    --border: #e2dfd8;
+    --accent: #e8453c;
+    --accent-ink: #ffffff;
+    --accent-soft: #fde8e6;
+    --ok: #1f8a4c;
+    --warn: #b7791f;
+    --chart-line: #e8453c;
+    --chart-fill: rgba(232, 69, 60, .14);
+    --band: rgba(29, 28, 26, .08);
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+    --radius: 14px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141312;
+      --surface: #1d1c1a;
+      --surface-2: #262522;
+      --text: #f1efea;
+      --muted: #a39e94;
+      --border: #34322e;
+      --accent: #ff5d52;
+      --accent-soft: #3a1f1d;
+      --chart-line: #ff6b61;
+      --chart-fill: rgba(255, 93, 82, .18);
+      --band: rgba(255, 255, 255, .08);
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 80px; }
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 26px; letter-spacing: .02em; }
+  header p { margin: 0; color: var(--muted); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; }
+  .card h2 { font-size: 16px; margin: 0 0 12px; }
+
+  .url-row { display: flex; gap: 10px; }
+  .url-row input {
+    flex: 1; min-width: 0; font-size: 16px; padding: 14px 16px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text); outline: none;
+  }
+  .url-row input:focus { border-color: var(--accent); background: var(--surface); }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 8px 14px; }
+  button:hover { background: var(--surface-2); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; padding: 12px 22px; font-size: 16px; white-space: nowrap; }
+  button.primary:hover { filter: brightness(1.05); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  a.btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; font-size: 14px; }
+  a.btn:hover { background: var(--surface-2); }
+  a.btn.accent { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .settings { display: flex; flex-wrap: wrap; gap: 14px 22px; margin-top: 16px; align-items: center; color: var(--muted); font-size: 14px; }
+  .settings label { display: inline-flex; align-items: center; gap: 8px; }
+  .settings input[type=number] { width: 64px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; }
+  .settings input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .msg { margin-top: 10px; color: var(--accent); font-size: 14px; min-height: 1em; }
+
+  .steps { display: flex; gap: 6px; margin: 4px 0 14px; flex-wrap: wrap; }
+  .step { display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 13px; }
+  .step.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .step.done { color: var(--ok); }
+  .step.done::before { content: "✓"; }
+  .step.active::before { content: ""; width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .status-title { font-weight: 700; overflow-wrap: anywhere; }
+  details.log summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 6px; }
+  pre.log { background: var(--surface-2); border-radius: 10px; padding: 12px; font: 12.5px/1.55 var(--mono); max-height: 240px; overflow: auto; white-space: pre-wrap; margin: 8px 0 0; }
+  .error-box { background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 12px 14px; margin-top: 10px; overflow-wrap: anywhere; }
+
+  .chart-wrap { position: relative; margin-top: 6px; }
+  svg.chart { width: 100%; height: 140px; display: block; }
+  svg.chart .band { fill: var(--band); cursor: pointer; }
+  svg.chart .band:hover { fill: var(--accent-soft); }
+  svg.chart .band-label { fill: var(--text); font-size: 11px; font-weight: 700; pointer-events: none; }
+  svg.chart .axis { fill: var(--muted); font-size: 11px; }
+  .chart-legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+
+  .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .clip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; scroll-margin-top: 20px; }
+  .clip.flash { outline: 2px solid var(--accent); }
+  .clip video { width: 100%; background: #000; display: block; max-height: 420px; }
+  .clip .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .clip .head { display: flex; align-items: baseline; gap: 10px; }
+  .rank { font-weight: 800; color: var(--accent); font-size: 18px; }
+  .time { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .len { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .bar { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); border-radius: 99px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .history { list-style: none; margin: 0; padding: 0; }
+  .history li { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-top: 1px solid var(--border); cursor: pointer; font-size: 14px; }
+  .history li:first-child { border-top: 0; }
+  .history li:hover { color: var(--accent); }
+  .history .src { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge { font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+  .badge.done { color: var(--ok); }
+  .badge.error { color: var(--accent); }
+  .badge.running, .badge.queued { color: var(--warn); }
+  .hidden { display: none !important; }
+  footer { color: var(--muted); font-size: 12.5px; text-align: center; margin-top: 30px; }
+
+  @media (max-width: 560px) {
+    main { padding-top: 20px; }
+    .url-row { flex-direction: column; }
+    button.primary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>✂️ kirinuki</h1>
+    <p>YouTube の盛り上がりを自動で見つけて切り抜きます</p>
+  </header>
+
+  <section class="card">
+    <form id="form" autocomplete="off">
+      <div class="url-row">
+        <input id="source" type="text" inputmode="url" placeholder="YouTube の URL を貼り付け (https://www.youtube.com/watch?v=...)" required>
+        <button class="primary" id="submit" type="submit">切り抜く</button>
+      </div>
+      <div class="settings">
+        <label>本数 <input id="count" type="number" min="1" max="20" value="3"></label>
+        <label>長さ <input id="min_len" type="number" min="5" max="600" value="30"> 〜 <input id="max_len" type="number" min="5" max="600" value="60"> 秒</label>
+        <label title="山場の前に入れる前振りの秒数">前振り <input id="lead_in" type="number" min="0" max="120" value="10"> 秒</label>
+        <label><input id="vertical" type="checkbox"> 縦型 (ショート用)</label>
+      </div>
+      <div class="msg" id="form-msg"></div>
+    </form>
+  </section>
+
+  <section class="card hidden" id="job">
+    <div class="status-line">
+      <div class="status-title" id="job-title"></div>
+      <button id="open-folder" class="hidden" type="button">📂 保存フォルダを開く</button>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div id="job-error" class="error-box hidden"></div>
+    <details class="log" id="log-details">
+      <summary>処理ログ</summary>
+      <pre class="log" id="log"></pre>
+    </details>
+  </section>
+
+  <section class="card hidden" id="overview">
+    <h2>盛り上がりグラフ</h2>
+    <div class="chart-wrap"><svg class="chart" id="chart"></svg></div>
+    <div class="chart-legend">
+      <span>使用データ: <span class="chips" id="signals" style="display:inline-flex"></span></span>
+      <span>網掛け = 切り抜いた区間 (クリックでジャンプ)</span>
+    </div>
+  </section>
+
+  <section id="clips" class="clips"></section>
+
+  <section class="card hidden" id="history-card" style="margin-top:20px">
+    <h2>履歴</h2>
+    <ul class="history" id="history"></ul>
+  </section>
+
+  <footer>切り抜きを公開する前に、元の配信者の切り抜きガイドラインを確認してください。</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const SIGNAL_NAMES = { heatmap: "最も再生された部分", chat: "チャット", audio: "音量" };
+const STEPS = [
+  { key: "info", label: "動画情報", match: /動画情報|音量を解析/ },
+  { key: "analyze", label: "盛り上がり解析", match: /チャット|音声|使用したシグナル|盛り上がり候補/ },
+  { key: "render", label: "書き出し", match: /書き出し|ダウンロード中/ },
+  { key: "done", label: "完了", match: /完了しました/ },
+];
+const SETTINGS = ["count", "min_len", "max_len", "lead_in", "vertical"];
+let currentJob = null;
+let pollTimer = null;
+let renderedJobKey = null;
+
+function fmt(sec) {
+  sec = Math.floor(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  const mm = h ? String(m).padStart(2, "0") : m;
+  return (h ? h + ":" : "") + mm + ":" + String(s).padStart(2, "0");
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("kirinuki-settings") || "{}");
+    for (const k of SETTINGS) if (k in saved) {
+      if (k === "vertical") $(k).checked = !!saved[k]; else $(k).value = saved[k];
+    }
+  } catch (e) {}
+}
+function saveSettings(data) {
+  try { localStorage.setItem("kirinuki-settings", JSON.stringify(data)); } catch (e) {}
+}
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `エラー (${res.status})`);
+  return data;
+}
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("form-msg").textContent = "";
+  const data = { source: $("source").value.trim() };
+  for (const k of SETTINGS) data[k] = k === "vertical" ? $(k).checked : Number($(k).value);
+  saveSettings(data);
+  $("submit").disabled = true;
+  try {
+    const job = await api("/api/jobs", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+    });
+    showJob(job.id);
+    loadHistory();
+  } catch (err) {
+    $("form-msg").textContent = err.message;
+  } finally {
+    $("submit").disabled = false;
+  }
+});
+
+$("open-folder").addEventListener("click", async () => {
+  if (!currentJob) return;
+  try { await api(`/api/jobs/${currentJob}/open`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); }
+  catch (err) { alert(err.message); }
+});
+
+function showJob(id) {
+  currentJob = id;
+  lastResult = null;
+  renderedJobKey = null;
+  clearTimeout(pollTimer);
+  $("clips").innerHTML = "";
+  $("overview").classList.add("hidden");
+  poll();
+}
+
+async function poll() {
+  if (!currentJob) return;
+  const id = currentJob;
+  try {
+    const job = await api(`/api/jobs/${id}`);
+    if (id !== currentJob) return;
+    renderJob(job);
+    if (job.status === "queued" || job.status === "running") {
+      pollTimer = setTimeout(poll, 1000);
+    } else {
+      loadHistory();
+    }
+  } catch (err) {
+    $("job-error").textContent = "アプリとの接続が切れました。アプリが起動しているか確認してください。";
+    $("job-error").classList.remove("hidden");
+    pollTimer = setTimeout(poll, 3000);
+  }
+}
+
+function renderJob(job) {
+  $("job").classList.remove("hidden");
+  const title = job.result?.title || job.source;
+  $("job-title").textContent = title;
+
+  // ステップ表示: ログからどこまで進んだかを判定
+  let reached = -1;
+  job.logs.forEach(line => STEPS.forEach((s, i) => { if (s.match.test(line)) reached = Math.max(reached, i); }));
+  if (job.status === "done") reached = STEPS.length - 1;
+  $("steps").innerHTML = STEPS.map((s, i) => {
+    let cls = "step";
+    if (job.status === "done" || i < reached) cls += " done";
+    else if (i === Math.max(reached, 0) && job.status !== "error") cls += " active";
+    if (job.status === "queued" && i === 0) cls = "step active";
+    return `<span class="${cls}">${esc(i === 0 && job.status === "queued" ? "順番待ち" : s.label)}</span>`;
+  }).join("");
+
+  const pre = $("log");
+  const atBottom = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 5;
+  pre.textContent = job.logs.join("\n");
+  if (atBottom) pre.scrollTop = pre.scrollHeight;
+
+  const err = $("job-error");
+  if (job.status === "error") {
+    err.textContent = "エラー: " + job.error;
+    err.classList.remove("hidden");
+    $("log-details").open = true;
+  } else {
+    err.classList.add("hidden");
+  }
+  $("open-folder").classList.toggle("hidden", job.status !== "done");
+
+  const key = job.id + ":" + job.status;
+  if (job.status === "done" && job.result && renderedJobKey !== key) {
+    renderedJobKey = key;
+    renderResult(job);
+  }
+}
+
+let lastResult = null;
+window.addEventListener("resize", () => { if (lastResult) renderChart(lastResult); });
+
+function renderResult(job) {
+  lastResult = job.result;
+  const r = job.result;
+  $("signals").innerHTML = r.signals.map(s => `<span class="chip">${esc(SIGNAL_NAMES[s] || s)}</span>`).join("");
+  renderChart(r);
+  $("overview").classList.remove("hidden");
+
+  const maxScore = Math.max(...r.clips.map(c => c.score), 1e-6);
+  const vertical = job.options?.vertical;
+  $("clips").innerHTML = r.clips.map(c => {
+    const src = c.file ? `/files/${job.id}/${encodeURIComponent(c.file)}` : null;
+    const peakSignals = Object.entries(c.signals_at_peak || {})
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `<span class="chip">${esc(SIGNAL_NAMES[k] || k)} ${Math.round(v * 100)}%</span>`).join("");
+    return `
+      <article class="clip" id="clip-${c.rank}">
+        ${src ? `<video src="${src}#t=0.5" controls preload="metadata" ${vertical ? 'style="aspect-ratio:9/16;object-fit:contain"' : ""}></video>` : ""}
+        <div class="body">
+          <div class="head">
+            <span class="rank">#${c.rank}</span>
+            <span class="time">${fmt(c.start)} – ${fmt(c.end)}</span>
+            <span class="len">${c.length}秒</span>
+          </div>
+          <div class="bar" title="盛り上がり度"><div style="width:${Math.round(c.score / maxScore * 100)}%"></div></div>
+          <div class="chips">${peakSignals}</div>
+          <div class="actions">
+            ${src ? `<a class="btn accent" href="${src}?download=1">⬇ ダウンロード</a>` : ""}
+            ${c.url ? `<a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener">▶ YouTube で見る</a>` : ""}
+          </div>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function renderChart(r) {
+  const svg = $("chart");
+  const W = Math.max(svg.clientWidth, 200), H = 140, top = 16, bottom = 20;
+  const pts = r.score || [];
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  if (!pts.length) { svg.innerHTML = ""; return; }
+  const max = Math.max(...pts, 1e-6);
+  const x = (i) => i / Math.max(pts.length - 1, 1) * W;
+  const y = (v) => top + (1 - v / max) * (H - top - bottom);
+  const tx = (sec) => sec / r.duration * W;
+  const line = pts.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const area = `${line}L${W},${H - bottom}L0,${H - bottom}Z`;
+  const bands = r.clips.map(c => {
+    const x0 = tx(c.start), w = Math.max(tx(c.end) - x0, 3);
+    return `<rect class="band" data-rank="${c.rank}" x="${x0}" y="0" width="${w}" height="${H - bottom}"><title>#${c.rank} ${fmt(c.start)}–${fmt(c.end)}</title></rect>
+            <text class="band-label" x="${x0 + w / 2}" y="12" text-anchor="middle">#${c.rank}</text>`;
+  }).join("");
+  const ticks = (W < 500 ? [0, .5, 1] : [0, .25, .5, .75, 1]).map(f =>
+    `<text class="axis" x="${f * W}" y="${H - 4}" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}">${fmt(f * r.duration)}</text>`).join("");
+  svg.innerHTML = `${bands}
+    <path d="${area}" fill="var(--chart-fill)"/>
+    <path d="${line}" fill="none" stroke="var(--chart-line)" stroke-width="1.8" vector-effect="non-scaling-stroke"/>
+    ${ticks}`;
+  svg.querySelectorAll(".band").forEach(b => b.addEventListener("click", () => {
+    const el = $("clip-" + b.dataset.rank);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("flash");
+    setTimeout(() => el.classList.remove("flash"), 1200);
+  }));
+}
+
+const STATUS_NAMES = { queued: "順番待ち", running: "処理中", done: "完了", error: "エラー" };
+async function loadHistory() {
+  try {
+    const jobs = await api("/api/jobs");
+    $("history-card").classList.toggle("hidden", jobs.length === 0);
+    $("history").innerHTML = jobs.map(j => `
+      <li data-id="${j.id}">
+        <span class="badge ${j.status}">${STATUS_NAMES[j.status] || j.status}</span>
+        <span class="src">${esc(j.result?.title || j.source)}</span>
+        <span class="badge">${new Date(j.created * 1000).toLocaleTimeString()}</span>
+      </li>`).join("");
+    $("history").querySelectorAll("li").forEach(li => li.addEventListener("click", () => {
+      showJob(li.dataset.id);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }));
+    // 開いたときに処理中のジョブがあれば表示する
+    if (!currentJob) {
+      const active = jobs.find(j => j.status === "running" || j.status === "queued") || jobs[0];
+      if (active) showJob(active.id);
+    }
+  } catch (e) {}
+}
+
+loadSettings();
+loadHistory();
+$("source").focus();
+</script>
+</body>
+</html>

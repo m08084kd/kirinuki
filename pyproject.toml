@@ -20,6 +20,10 @@ dev = ["pytest", "imageio-ffmpeg"]
 
 [project.scripts]
 kirinuki = "kirinuki.cli:main"
+kirinuki-app = "kirinuki.app:main"
 
 [tool.setuptools]
 packages = ["kirinuki"]
+
+[tool.setuptools.package-data]
+kirinuki = ["web/*.html"]
